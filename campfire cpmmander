@@ -1,0 +1,294 @@
+//mainactivity
+package com.bridget.campfirecommander
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import com.bridget.campsitecommander.GearData
+
+/**
+ *MainActivity-The main hub of the Campsite Commander app.
+ *Display total items packed(Calculated via loop in GearData)
+ *Provides navigation to Add Gear and detailed view screens
+ */
+class MainActivity:AppCompatActivity() {
+
+    private lateinit var tvTotalItems:TextView
+    private lateinit var btnAddGear:Button
+    private lateinit var btnViewGear:Button
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        android.util.Log.i("MainActivity", "MainActivity created")
+
+        //Bind views
+        tvTotalItems = findViewById(R.id.tvTotalItems)
+        btnAddGear = findViewById(R.id.btnAddGear)
+        btnViewGear = findViewById(R.id.btnViewGear)
+
+        btnAddGear.setOnClickListener {
+            android.util.Log.d("MainActivity", "Add Gear button clicked")
+            startActivity(Intent(this, AddGearActivity::class.java))
+        }
+    }
+
+
+
+    override fun onResume() {
+        super.onResume()
+        val total = GearData.getTotalItemsPacked()
+        tvTotalItems.text = "Total Items Packed:"
+        total" android.util.Log.i(MainActivity", "Totalitemsdisplayed:
+        total")
+    }
+}
+
+//Add gear Activity
+package com.bridget.campfirecommander
+
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
+/**
+ * AddGearActivity - Allows users to add new camping gear.
+ * Captures Item Name, Category, Quantity, and Comments.
+ * Uses input validation for error handling.
+ */
+class AddGearActivity : AppCompatActivity() {
+
+    private lateinit var etItemName: EditText
+    private lateinit var spinnerCategory: Spinner
+    private lateinit var etQuantity: EditText
+    private lateinit var etComments: EditText
+    private lateinit var btnSaveGear: Button
+    private lateinit var btnBack: Button
+
+    private val categories = arrayOf(
+        "Shelter", "Food", "Safety",
+        "First Aid", "Cooking", "Navigation",
+        "Clothing", "Other"
+    )
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_add_gear)
+
+        android.util.Log.i("AddGearActivity", "AddGearActivity created")
+
+        etItemName      = findViewById(R.id.etItemName)
+        spinnerCategory = findViewById(R.id.spinnerCategory)
+        etQuantity      = findViewById(R.id.etQuantity)
+        etComments      = findViewById(R.id.etComments)
+        btnSaveGear     = findViewById(R.id.btnSaveGear)
+        btnBack         = findViewById(R.id.btnBackFromAdd)
+
+        // Set up category spinner
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerCategory.adapter = adapter
+
+        btnSaveGear.setOnClickListener {
+            saveGearItem()
+        }
+
+        btnBack.setOnClickListener {
+            android.util.Log.d("AddGearActivity", "Back button clicked")
+            finish()
+        }
+    }
+
+    /**
+     * Validates user input and saves the new gear item.
+     * Provides error feedback for incorrect input.
+     */
+    private fun saveGearItem() {
+        val name    = etItemName.text.toString().trim()
+        val category = spinnerCategory.selectedItem.toString()
+        val qtyStr  = etQuantity.text.toString().trim()
+        val comment = etComments.text.toString().trim()
+
+        // Input validation
+        if (name.isEmpty()) {
+            etItemName.error = "Please enter an item name"
+            android.util.Log.w("AddGearActivity", "Validation failed: empty name")
+            return
+        }
+
+        if (qtyStr.isEmpty()) {
+            etQuantity.error = "Please enter a quantity"
+            android.util.Log.w("AddGearActivity", "Validation failed: empty quantity")
+            return
+        }
+
+        val qty = qtyStr.toIntOrNull()
+        if (qty == null || qty <= 0) {
+            etQuantity.error = "Quantity must be a positive number"
+            android.util.Log.w("AddGearActivity", "Validation failed: invalid quantity")
+            return
+        }
+
+        // Save to parallel arrays
+        GearData.addItem(name, category, qty, comment.ifEmpty { "No notes" })
+
+        android.util.Log.i("AddGearActivity", "Gear saved: $name")
+        Toast.makeText(this, "'$name' added to your pack!", Toast.LENGTH_SHORT).show()
+
+        // Clear fields
+        etItemName.text.clear()
+        etQuantity.text.clear()
+        etComments.text.clear()
+        spinnerCategory.setSelection(0)
+    }
+}
+
+//detailedviewactivity
+package com.bridget.campfirecommander
+
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+
+/**
+ * AddGearActivity - Allows users to add new camping gear.
+ * Captures Item Name, Category, Quantity, and Comments.
+ * Uses input validation for error handling.
+ */
+class AddGearActivity : AppCompatActivity() {
+
+    private lateinit var etItemName: EditText
+    private lateinit var spinnerCategory: Spinner
+    private lateinit var etQuantity: EditText
+    private lateinit var etComments: EditText
+    private lateinit var btnSaveGear: Button
+    private lateinit var btnBack: Button
+
+    private val categories = arrayOf(
+        "Shelter", "Food", "Safety",
+        "First Aid", "Cooking", "Navigation",
+        "Clothing", "Other"
+    )
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_add_gear)
+
+        android.util.Log.i("AddGearActivity", "AddGearActivity created")
+
+        etItemName      = findViewById(R.id.etItemName)
+        spinnerCategory = findViewById(R.id.spinnerCategory)
+        etQuantity      = findViewById(R.id.etQuantity)
+        etComments      = findViewById(R.id.etComments)
+        btnSaveGear     = findViewById(R.id.btnSaveGear)
+        btnBack         = findViewById(R.id.btnBackFromAdd)
+
+        // Set up category spinner
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerCategory.adapter = adapter
+
+        btnSaveGear.setOnClickListener {
+            saveGearItem()
+        }
+
+        btnBack.setOnClickListener {
+            android.util.Log.d("AddGearActivity", "Back button clicked")
+            finish()
+        }
+    }
+
+//gear data
+
+package com.bridget.campsitecommander
+
+/**
+ * GearData - Singleton object that stores all gear data using parallel arrays.
+ * Uses parallel arrays: itemNames, categories, quantities, comments.
+ * Each index across all arrays represents one gear item.
+ */
+
+    // Parallel arrays to store gear details
+    val itemNames  = mutableListOf("Tent", "Marshmallows", "Flashlight", "First Aid Kit", "Water Bottle")
+    val categories = mutableListOf("Shelter", "Food", "Safety", "First Aid", "Cooking")
+    val quantities = mutableListOf(1, 3, 2, 1, 4)
+    val comments   = mutableListOf(
+        "4-person waterproof",
+        "For S'mores (Mega size)",
+        "Check batteries (AA)",
+        "Check expiry dates",
+        "BPA-free, 1L each"
+    )
+
+    /**
+     * Adds a new gear item to all parallel arrays simultaneously.
+     */
+    fun addItem(name: String, category: String, qty: Int, comment: String) {
+        itemNames.add(name)
+        categories.add(category)
+        quantities.add(qty)
+        comments.add(comment)
+        android.util.Log.d("GearData", "Item added: $name | Category: $category | Qty: $qty")
+    }
+
+    /**
+     * Calculates total number of individual items packed using a loop.
+     */
+    fun getTotalItemsPacked(): Int {
+        var total = 0
+        for (qty in quantities) {
+            total += qty
+        }
+        android.util.Log.d("GearData", "Total items packed: $total")
+        return total
+    }
+
+    /**
+     * Returns the number of unique gear entries.
+     */
+    fun getItemCount(): Int = itemNames.size
+}
+
+//splashactivity
+
+package com.bridget.campsitecommander
+
+import android.content.Intent
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import androidx.appcompat.app.AppCompatActivity
+
+/**
+ * SplashActivity - Entry point of the app.
+ * Displays the Campsite Commander logo and title for 3 seconds,
+ * then transitions to MainActivity.
+ */
+class SplashActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_splash)
+
+        android.util.Log.i("SplashActivity", "App launched - showing splash screen")
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            android.util.Log.i("SplashActivity", "Navigating to MainActivity")
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }, 3000)
+    }
+}
+
